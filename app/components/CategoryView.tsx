@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { useOrbitStore } from '@/lib/store'
 import { subStat, pct } from '@/lib/engine'
 import { Pencil, Trash2, Check, X } from 'lucide-react'
+import { TaskCheckbox } from './TaskCheckbox'
 import type { Category, Subcategory, Task } from '@/lib/types'
 
 interface CategoryViewProps {
@@ -200,21 +201,11 @@ function SubcategoryCard({
         ) : sub.tasks.map(task => (
           <div key={task.id} className={`flex items-center gap-3 py-[9px] border-b last:border-0 ${task.done ? 'opacity-70' : ''}`} style={{ borderColor: 'var(--line)', ['--c' as string]: cat.color }}>
             {/* Checkbox */}
-            <button
-              onClick={() => onToggleTask(task.id)}
-              aria-pressed={task.done}
-              aria-label={task.done ? 'Mark task as incomplete' : 'Mark task as complete'}
-              className="chk"
-              style={{
-                ['--c' as string]: cat.color || 'var(--accent)',
-              }}
-            >
-              {task.done && (
-                <svg viewBox="0 0 12 12">
-                  <path d="M2 6.5l2.6 2.6L10 3.4" />
-                </svg>
-              )}
-            </button>
+            <TaskCheckbox
+              done={task.done}
+              color={cat.color}
+              onToggle={() => onToggleTask(task.id)}
+            />
 
             {/* Task text */}
             <div className="flex-1 min-w-0">
