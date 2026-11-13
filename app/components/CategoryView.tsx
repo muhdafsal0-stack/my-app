@@ -203,17 +203,15 @@ function SubcategoryCard({
             <button
               onClick={() => onToggleTask(task.id)}
               aria-pressed={task.done}
-              aria-label="Toggle task"
-              className="flex-none w-[22px] h-[22px] rounded-full border-[1.8px] grid place-items-center transition-all duration-250"
+              aria-label={task.done ? 'Mark task as incomplete' : 'Mark task as complete'}
+              className="chk"
               style={{
-                borderColor: cat.color,
-                background: task.done ? cat.color : 'transparent',
-                boxShadow: task.done ? `0 0 0 4px ${cat.color}33` : 'none',
+                ['--c' as string]: cat.color || 'var(--accent)',
               }}
             >
               {task.done && (
-                <svg viewBox="0 0 12 12" width={12} height={12}>
-                  <path d="M2 6.5l2.6 2.6L10 3.4" stroke="#fff" strokeWidth={3} fill="none" strokeLinecap="round" strokeLinejoin="round" />
+                <svg viewBox="0 0 12 12">
+                  <path d="M2 6.5l2.6 2.6L10 3.4" />
                 </svg>
               )}
             </button>
