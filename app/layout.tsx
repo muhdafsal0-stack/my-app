@@ -1,19 +1,5 @@
 import type { Metadata } from 'next'
-import { Fraunces, Manrope } from 'next/font/google'
 import './globals.css'
-
-const fraunces = Fraunces({
-  subsets: ['latin'],
-  variable: '--font-fraunces',
-  display: 'swap',
-  axes: ['opsz'],
-})
-
-const manrope = Manrope({
-  subsets: ['latin'],
-  variable: '--font-manrope',
-  display: 'swap',
-})
 
 export const metadata: Metadata = {
   title: 'Orbit — Personal Progress Tracker',
@@ -24,14 +10,20 @@ export default function RootLayout({ children }: LayoutProps<'/'>) {
   return (
     <html lang="en" data-theme="dark">
       <head>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link
+          href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600&family=Manrope:wght@400;500;600;700&display=swap"
+          rel="stylesheet"
+        />
         <style>{`
           :root {
-            --serif: var(--font-fraunces), Georgia, serif;
-            --sans: var(--font-manrope), system-ui, sans-serif;
+            --serif: 'Fraunces', Georgia, serif;
+            --sans: 'Manrope', system-ui, -apple-system, sans-serif;
           }
         `}</style>
       </head>
-      <body className={`${fraunces.variable} ${manrope.variable} min-h-full`}>
+      <body className="min-h-full">
         {children}
       </body>
     </html>

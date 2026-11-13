@@ -2,7 +2,6 @@
 
 import { useOrbitStore } from '@/lib/store'
 import { allStat, pct, catStat } from '@/lib/engine'
-import { toggleTask } from '@/lib/store'
 import type { Category, Subcategory, Task } from '@/lib/types'
 
 interface TaskRowProps {

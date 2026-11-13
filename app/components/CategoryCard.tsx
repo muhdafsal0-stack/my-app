@@ -2,8 +2,8 @@
 
 import { useState, useRef } from 'react'
 import { useOrbitStore } from '@/lib/store'
-import { catStat, pct } from '@/lib/engine'
-import { Pencil, Trash2, ChevronRight } from 'lucide-react'
+import { catStat, pct, getNextColor } from '@/lib/engine'
+import { ChevronRight } from 'lucide-react'
 import type { Category } from '@/lib/types'
 
 interface CategoryCardProps {
@@ -76,7 +76,6 @@ export function AddCategoryCard() {
   const [name, setName] = useState('')
   const inputRef = useRef<HTMLInputElement>(null)
 
-  const { getNextColor } = require('@/lib/engine')
   const color = getNextColor(cats)
 
   const handleSubmit = (e: React.FormEvent) => {
