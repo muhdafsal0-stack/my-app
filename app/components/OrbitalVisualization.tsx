@@ -135,7 +135,7 @@ export default function OrbitalVisualization({ cats, lastPopped, onSelectCategor
                 }
               }}
             >
-              <title>{`${cat.name} — Touch / click to view subcategories`}</title>
+              <title>{cat.name}</title>
 
               {/* Wide invisible stroke hit area (28px) for effortless touch on mobile and mouse */}
               <circle
@@ -249,9 +249,9 @@ export default function OrbitalVisualization({ cats, lastPopped, onSelectCategor
           if (!cat) return null
           return (
             <div
-              className="absolute bottom-4 left-1/2 -translate-x-1/2 px-3.5 py-1.5 rounded-full text-[12.5px] font-medium flex items-center gap-2 pointer-events-none transition-all duration-200 z-10"
+              className="absolute bottom-4 left-1/2 -translate-x-1/2 px-4 py-1.5 rounded-full text-[13px] font-medium flex items-center gap-2 pointer-events-none transition-all duration-200 z-10 whitespace-nowrap"
               style={{
-                background: 'rgba(15, 14, 31, 0.92)',
+                background: 'rgba(15, 14, 31, 0.94)',
                 border: `1.5px solid ${cat.color}`,
                 color: '#ECEAFB',
                 boxShadow: `0 4px 16px rgba(0,0,0,0.6), 0 0 12px ${cat.color}55`,
@@ -259,11 +259,10 @@ export default function OrbitalVisualization({ cats, lastPopped, onSelectCategor
               }}
             >
               <span
-                className="w-2 h-2 rounded-full inline-block"
+                className="w-2.5 h-2.5 rounded-full inline-block flex-none"
                 style={{ backgroundColor: cat.color }}
               />
               <span className="font-semibold">{cat.name}</span>
-              <span style={{ opacity: 0.65 }}>• Touch to open subcategories</span>
             </div>
           )
         })()
