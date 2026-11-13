@@ -1,5 +1,6 @@
 'use client'
 
+import { useState } from 'react'
 import { useOrbitStore } from '@/lib/store'
 import { allStat, pct, catStat } from '@/lib/engine'
 import { TaskCheckbox } from './TaskCheckbox'
@@ -24,7 +25,10 @@ export function TaskRow({ task, cat, sub, onToggle }: TaskRowProps) {
         onToggle={onToggle}
       />
 
-      <div className="flex-1 min-w-0">
+      <div
+        className="flex-1 min-w-0 cursor-pointer select-none"
+        onClick={onToggle}
+      >
         <span
           className={`text-[14px] break-words ${task.done ? 'line-through' : ''}`}
           style={{ color: task.done ? 'var(--mute)' : 'var(--ink)', textDecorationColor: cat.color }}
@@ -41,6 +45,7 @@ export function TaskRow({ task, cat, sub, onToggle }: TaskRowProps) {
 
 export function TaskStreamPanels() {
   const { cats, toggleTask } = useOrbitStore()
+  const [hoveredBarCat, setHoveredBarCat] = useState<string | null>(null)
 
   const all = cats.flatMap(c =>
     c.subs.flatMap(s =>
@@ -88,29 +93,99 @@ export function TaskStreamPanels() {
         <div className="rounded-[20px] border p-[18px]" style={{ background: 'var(--card)', borderColor: 'var(--line)', boxShadow: 'var(--shadow)' }}>
           {stat.d > 0 ? (
             <>
-              {/* Stacked color bar */}
-              <div className="flex h-[12px] rounded-[8px] overflow-hidden mb-3" style={{ background: 'var(--track)' }}>
-                {cats.map(c => {
+              {/* Stacked color bar with hover tooltip */}
+              <div className="relative mb-3.5">
+                <div className="flex h-[14px] rounded-[8px] overflow-hidden" style={{ background: 'var(--track)' }}>
+                  {cats.map(c => {
+                    const d = catStat(c).d
+                    if (d <= 0) return null
+                    const isHovered = hoveredBarCat === c.id
+                    return (
+                      <div
+                        key={c.id}
+                        onMouseEnter={() => setHoveredBarCat(c.id)}
+                        onMouseLeave={() => setHoveredBarCat(null)}
+                        className="transition-all duration-200 cursor-pointer"
+                        style={{
+                          flex: d,
+                          background: c.color,
+                          opacity: hoveredBarCat && !isHovered ? 0.35 : 1,
+                          filter: isHovered ? `brightness(1.2) drop-shadow(0 0 6px ${c.color})` : 'none',
+                          transform: isHovered ? 'scaleY(1.25)' : 'scaleY(1)',
+                        }}
+                      />
+                    )
+                  })}
+                </div>
+
+                {/* Hover Tooltip Popup on the bar */}
+                {hoveredBarCat && (
+                  (() => {
+                    const targetCat = cats.find(c => c.id === hoveredBarCat)
+                    if (!targetCat) return null
+                    const count = catStat(targetCat).d
+                    return (
+                      <div
+                        className="absolute -top-10 left-1/2 -translate-x-1/2 px-3 py-1 rounded-[8px] text-[12px] font-medium flex items-center gap-1.5 pointer-events-none z-20 whitespace-nowrap shadow-lg animate-in fade-in zoom-in-95 duration-150"
+                        style={{
+                          background: 'rgba(15, 14, 31, 0.94)',
+                          border: `1.5px solid ${targetCat.color}`,
+                          color: '#ECEAFB',
+                          boxShadow: `0 4px 16px rgba(0,0,0,0.6), 0 0 10px ${targetCat.color}55`,
+                          backdropFilter: 'blur(8px)',
+                        }}
+                      >
+                        <span
+                          className="w-2 h-2 rounded-full inline-block flex-none"
+                          style={{ backgroundColor: targetCat.color }}
+                        />
+                        <span className="font-semibold">{targetCat.name}:</span>
+                        <span>{count} task{count === 1 ? '' : 's'} completed</span>
+                      </div>
+                    )
+                  })()
+                )}
+              </div>
+
+              {/* Legend with ONLY Category Names, highlights on hover */}
+              <div className="flex flex-wrap gap-x-3.5 gap-y-1.5 text-[13px] mb-4">
+                {cats.filter(c => catStat(c).d > 0).map(c => {
+                  const isHovered = hoveredBarCat === c.id
                   const d = catStat(c).d
-                  return d > 0 ? (
-                    <div
+                  return (
+                    <span
                       key={c.id}
-                      title={c.name}
-                      className="transition-all duration-500"
-                      style={{ flex: d, background: c.color }}
-                    />
-                  ) : null
+                      onMouseEnter={() => setHoveredBarCat(c.id)}
+                      onMouseLeave={() => setHoveredBarCat(null)}
+                      className="flex items-center gap-1.5 cursor-pointer px-2 py-0.5 rounded-full transition-all duration-200 select-none"
+                      style={{
+                        color: isHovered ? 'var(--ink)' : 'var(--mute)',
+                        backgroundColor: isHovered ? `${c.color}22` : 'transparent',
+                        fontWeight: isHovered ? 600 : 400,
+                        transform: isHovered ? 'scale(1.05)' : 'scale(1)',
+                      }}
+                    >
+                      <b
+                        className="inline-block w-[8px] h-[8px] rounded-full flex-none transition-transform"
+                        style={{
+                          background: c.color,
+                          boxShadow: isHovered ? `0 0 6px ${c.color}` : 'none',
+                        }}
+                      />
+                      <span>{c.name}</span>
+                      {isHovered && (
+                        <span
+                          className="text-[11px] px-1.5 py-0.2 rounded-full font-bold ml-0.5 animate-in fade-in"
+                          style={{ background: c.color, color: '#ffffff' }}
+                        >
+                          {d}
+                        </span>
+                      )}
+                    </span>
+                  )
                 })}
               </div>
-              {/* Legend */}
-              <div className="flex flex-wrap gap-x-4 gap-y-1 text-[13px] mb-3" style={{ color: 'var(--mute)' }}>
-                {cats.filter(c => catStat(c).d > 0).map(c => (
-                  <span key={c.id} className="flex items-center gap-1.5">
-                    <b className="inline-block w-[9px] h-[9px] rounded-full" style={{ background: c.color }} />
-                    {c.name} {catStat(c).d}
-                  </span>
-                ))}
-              </div>
+
               {done.map(({ t, c, s }) => (
                 <TaskRow
                   key={t.id}

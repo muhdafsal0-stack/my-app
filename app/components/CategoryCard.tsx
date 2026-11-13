@@ -3,7 +3,7 @@
 import { useState, useRef } from 'react'
 import { useOrbitStore } from '@/lib/store'
 import { catStat, pct, getNextColor } from '@/lib/engine'
-import { ChevronRight, Trash2 } from 'lucide-react'
+import { ChevronRight, Trash2, Pencil } from 'lucide-react'
 import type { Category } from '@/lib/types'
 
 interface CategoryCardProps {
@@ -12,8 +12,10 @@ interface CategoryCardProps {
 }
 
 export function CategoryCard({ cat, onOpen }: CategoryCardProps) {
-  const deleteCategory = useOrbitStore(s => s.deleteCategory)
+  const { deleteCategory, updateCategory } = useOrbitStore()
   const [showConfirm, setShowConfirm] = useState(false)
+  const [showEdit, setShowEdit] = useState(false)
+  const [editName, setEditName] = useState(cat.name)
   const stat = catStat(cat)
   const p = pct(stat)
 
@@ -42,24 +44,40 @@ export function CategoryCard({ cat, onOpen }: CategoryCardProps) {
           style={{ background: cat.color }}
         />
 
-        {/* Card Header with Category Name & Delete Button */}
+        {/* Card Header with Category Name, Edit & Delete Buttons */}
         <div className="flex items-start justify-between gap-2 mb-1 relative z-10">
           <h3 className="font-semibold text-[18px] truncate flex-1" style={{ fontFamily: 'var(--serif)' }}>
             {cat.name}
           </h3>
-          <button
-            type="button"
-            onClick={(e) => {
-              e.stopPropagation()
-              setShowConfirm(true)
-            }}
-            title={`Delete ${cat.name}`}
-            aria-label={`Delete ${cat.name}`}
-            className="w-[28px] h-[28px] rounded-[8px] flex items-center justify-center opacity-40 hover:opacity-100 hover:text-red-400 transition-all flex-none -mr-1 -mt-1 cursor-pointer"
-            style={{ color: 'var(--mute)', background: 'var(--track)' }}
-          >
-            <Trash2 size={13} />
-          </button>
+          <div className="flex items-center gap-1 flex-none -mr-1 -mt-1">
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation()
+                setEditName(cat.name)
+                setShowEdit(true)
+              }}
+              title={`Edit ${cat.name}`}
+              aria-label={`Edit ${cat.name}`}
+              className="w-[28px] h-[28px] rounded-[8px] flex items-center justify-center opacity-40 hover:opacity-100 hover:text-[var(--accent)] transition-all cursor-pointer"
+              style={{ color: 'var(--mute)', background: 'var(--track)' }}
+            >
+              <Pencil size={13} />
+            </button>
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation()
+                setShowConfirm(true)
+              }}
+              title={`Delete ${cat.name}`}
+              aria-label={`Delete ${cat.name}`}
+              className="w-[28px] h-[28px] rounded-[8px] flex items-center justify-center opacity-40 hover:opacity-100 hover:text-red-400 transition-all cursor-pointer"
+              style={{ color: 'var(--mute)', background: 'var(--track)' }}
+            >
+              <Trash2 size={13} />
+            </button>
+          </div>
         </div>
 
         <div className="flex justify-between items-center text-[13px] mb-3" style={{ color: 'var(--mute)' }}>
@@ -95,7 +113,73 @@ export function CategoryCard({ cat, onOpen }: CategoryCardProps) {
         />
       </div>
 
-      {/* Confirmation Modal */}
+      {/* Edit Category Modal */}
+      {showEdit && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4"
+          style={{ background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(3px)' }}
+          onClick={(e) => {
+            e.stopPropagation()
+            setShowEdit(false)
+          }}
+        >
+          <div
+            className="rounded-[20px] border p-6 max-w-sm w-full"
+            style={{
+              background: 'var(--card)',
+              borderColor: 'var(--line)',
+              boxShadow: 'var(--shadow)',
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h4 className="font-semibold text-[17px] mb-3" style={{ fontFamily: 'var(--serif)' }}>
+              Rename Category
+            </h4>
+            <form
+              onSubmit={(e) => {
+                e.preventDefault()
+                const trimmed = editName.trim()
+                if (trimmed) {
+                  updateCategory({ id: cat.id, name: trimmed })
+                  setShowEdit(false)
+                }
+              }}
+            >
+              <input
+                value={editName}
+                onChange={(e) => setEditName(e.target.value)}
+                maxLength={60}
+                placeholder="Category name"
+                className="w-full border rounded-[12px] px-3 py-2 bg-transparent text-[15px] focus:border-solid focus:outline-none mb-4"
+                style={{ borderColor: 'var(--line)', color: 'var(--ink)' }}
+                autoFocus
+                onKeyDown={(e) => {
+                  if (e.key === 'Escape') setShowEdit(false)
+                }}
+              />
+              <div className="flex gap-3 justify-end">
+                <button
+                  type="button"
+                  onClick={() => setShowEdit(false)}
+                  className="px-4 py-2 rounded-[10px] text-[13px] font-medium transition-opacity hover:opacity-85 cursor-pointer"
+                  style={{ background: 'var(--track)', color: 'var(--ink)' }}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-4 py-2 rounded-[10px] text-[13px] font-semibold transition-opacity hover:opacity-90 cursor-pointer"
+                  style={{ background: 'var(--ink)', color: 'var(--bg)' }}
+                >
+                  Save
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Confirmation Modal for Deletion */}
       {showConfirm && (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center p-4"
