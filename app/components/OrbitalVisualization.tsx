@@ -44,9 +44,13 @@ export default function OrbitalVisualization({ cats, lastPopped }: OrbitalVisual
   const stat = allStat(cats)
   const overall = pct(stat)
   const progress = stat.t ? stat.d / stat.t : 0
-  const sunRadius = 14 + 30 * progress
-  const glowOpacity = 0.08 + 0.4 * progress
-  const sunOpacity = 0.3 + 0.7 * progress
+  
+  // Refined celestial metrics to match reference image 1:
+  // Compact sun and restrained ambient halo that never overpowers or blows out the orbits
+  const sunRadius = 16 + 6 * progress // 16px to 22px max
+  const coronaRadius = 38 + 10 * progress // 38px to 48px max (always comfortably inside the 64px+ orbit ring)
+  const coronaOpacity = 0.10 + 0.12 * progress // subtle warm halo (max 0.22 at 100%)
+  const sunOpacity = 0.85 + 0.15 * progress
 
   return (
     <div
@@ -55,13 +59,13 @@ export default function OrbitalVisualization({ cats, lastPopped }: OrbitalVisual
         background: 'linear-gradient(180deg,#0E0C2B,#1D1850)',
       }}
     >
-      {/* Warm glow overlay based on progress */}
+      {/* Subtle warm atmospheric glow overlay — restrained to keep deep cosmic sky crisp */}
       <div
         className="absolute inset-0 pointer-events-none transition-opacity duration-[1200ms]"
         style={{
           background:
-            'radial-gradient(circle at 50% 50%,rgba(255,186,90,.85),rgba(236,120,110,.35) 45%,transparent 72%)',
-          opacity: (overall / 100) * 0.9,
+            'radial-gradient(circle at 50% 50%, rgba(255, 186, 90, 0.25), rgba(236, 120, 110, 0.08) 42%, transparent 68%)',
+          opacity: (overall / 100) * 0.35,
         }}
       />
 
@@ -73,23 +77,24 @@ export default function OrbitalVisualization({ cats, lastPopped }: OrbitalVisual
         className="relative w-full h-full block"
       >
         <defs>
-          <radialGradient id="sg">
-            <stop offset="0" stopColor="#FFF6D6" />
-            <stop offset=".55" stopColor="#FFC95C" />
-            <stop offset="1" stopColor="#E0892B" />
+          <radialGradient id="sg" cx="42%" cy="42%" r="58%">
+            <stop offset="0%" stopColor="#FFF8E1" />
+            <stop offset="55%" stopColor="#FFC95C" />
+            <stop offset="100%" stopColor="#D9892B" />
           </radialGradient>
-          <filter id="gl" x="-200%" y="-200%" width="500%" height="500%">
-            <feGaussianBlur stdDeviation="3" />
+          <filter id="gl" x="-100%" y="-100%" width="300%" height="300%">
+            <feGaussianBlur stdDeviation="4" />
           </filter>
         </defs>
 
-        {/* Ambient corona */}
+        {/* Ambient corona — soft, dark-amber halo contained inside inner orbit */}
         <circle
           cx="200" cy="200"
-          r={sunRadius * 2.6}
-          fill="#FFB84D"
-          opacity={glowOpacity}
+          r={coronaRadius}
+          fill="#D9892B"
+          opacity={coronaOpacity}
           filter="url(#gl)"
+          style={{ transition: 'r 0.8s ease, opacity 0.8s ease' }}
         />
 
         {/* Category orbits */}
@@ -168,7 +173,10 @@ export default function OrbitalVisualization({ cats, lastPopped }: OrbitalVisual
           r={sunRadius}
           fill="url(#sg)"
           opacity={sunOpacity}
-          style={{ transition: 'r 1s ease, opacity 1s ease' }}
+          style={{
+            filter: 'drop-shadow(0 0 6px rgba(255, 185, 77, 0.45))',
+            transition: 'r 0.8s ease, opacity 0.8s ease',
+          }}
         />
       </svg>
 
