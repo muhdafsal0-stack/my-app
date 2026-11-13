@@ -9,6 +9,17 @@ interface OrbitalVisualizationProps {
   lastPopped: string | null
 }
 
+function getArcPath(cx: number, cy: number, r: number, startAngle: number, endAngle: number) {
+  const x1 = cx + r * Math.cos(startAngle)
+  const y1 = cy + r * Math.sin(startAngle)
+  const x2 = cx + r * Math.cos(endAngle)
+  const y2 = cy + r * Math.sin(endAngle)
+  let diff = endAngle - startAngle
+  while (diff < 0) diff += 2 * Math.PI
+  const largeArcFlag = diff > Math.PI ? 1 : 0
+  return `M ${x1.toFixed(2)} ${y1.toFixed(2)} A ${r} ${r} 0 ${largeArcFlag} 1 ${x2.toFixed(2)} ${y2.toFixed(2)}`
+}
+
 export default function OrbitalVisualization({ cats, lastPopped }: OrbitalVisualizationProps) {
   const anglesRef = useRef<Record<string, number>>({})
   const rafRef = useRef<number | null>(null)
@@ -102,14 +113,11 @@ export default function OrbitalVisualization({ cats, lastPopped }: OrbitalVisual
           const r = getOrbitRadius(i, cats.length)
           const tasks = cat.subs.flatMap(s => s.tasks)
           const total = tasks.length
-          const done = tasks.filter(t => t.done).length
-          const catProgress = total ? done / total : 0
-          const C = 2 * Math.PI * r
           const starSize = total > 40 ? 0.7 : 1
 
           return (
             <g key={cat.id}>
-              {/* Orbit track */}
+              {/* Static background orbit track */}
               <circle
                 cx="200" cy="200" r={r}
                 fill="none"
@@ -117,22 +125,42 @@ export default function OrbitalVisualization({ cats, lastPopped }: OrbitalVisual
                 strokeOpacity={0.22}
                 strokeDasharray={total ? undefined : '3 7'}
               />
-              {/* Progress arc */}
-              {total > 0 && (
-                <circle
-                  cx="200" cy="200" r={r}
-                  fill="none"
-                  stroke={cat.color}
-                  strokeOpacity={0.75}
-                  strokeWidth={2.2}
-                  strokeLinecap="round"
-                  strokeDasharray={`${C * catProgress} ${C}`}
-                  transform="rotate(-90 200 200)"
-                  style={{ transition: 'stroke-dasharray 0.8s ease' }}
-                />
-              )}
-              {/* Stars group (animated rotation) */}
+
+              {/* Orbiting group: Progress arcs and stars orbit together around the sun */}
               <g data-orb={cat.id} data-i={i} transform={`rotate(${anglesRef.current[cat.id] ?? 0} 200 200)`}>
+                {/* Lit-up ring segment if single task is done */}
+                {total === 1 && tasks[0].done && (
+                  <circle
+                    cx="200" cy="200" r={r}
+                    fill="none"
+                    stroke={cat.color}
+                    strokeWidth={2.4}
+                    strokeOpacity={0.85}
+                    style={{ filter: `drop-shadow(0 0 3px ${cat.color})` }}
+                  />
+                )}
+
+                {/* Lit-up ring segments connecting directly from one star to the other */}
+                {total > 1 &&
+                  tasks.map((task, j) => {
+                    if (!task.done) return null
+                    const startAngle = (2 * Math.PI * j) / total
+                    const endAngle = (2 * Math.PI * (j + 1)) / total
+                    return (
+                      <path
+                        key={`arc-${task.id}`}
+                        d={getArcPath(200, 200, r, startAngle, endAngle)}
+                        fill="none"
+                        stroke={cat.color}
+                        strokeWidth={2.4}
+                        strokeLinecap="round"
+                        strokeOpacity={0.85}
+                        style={{ filter: `drop-shadow(0 0 3px ${cat.color})` }}
+                      />
+                    )
+                  })}
+
+                {/* Stars along the orbit */}
                 {tasks.map((task, j) => {
                   const { x, y } = getStarPosition(j, total, r)
                   const isPopped = lastPopped === task.id
