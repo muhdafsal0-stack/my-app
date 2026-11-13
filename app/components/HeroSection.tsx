@@ -4,7 +4,11 @@ import { useOrbitStore } from '@/lib/store'
 import { allStat, pct, getStage, STAGES } from '@/lib/engine'
 import OrbitalVisualization from './OrbitalVisualization'
 
-export default function HeroSection() {
+interface HeroSectionProps {
+  onSelectCategory?: (id: string) => void
+}
+
+export default function HeroSection({ onSelectCategory }: HeroSectionProps) {
   const { cats, lastPopped } = useOrbitStore()
   const stat = allStat(cats)
   const overall = pct(stat)
@@ -21,7 +25,11 @@ export default function HeroSection() {
       }}
     >
       {/* Left: Orbital sky */}
-      <OrbitalVisualization cats={cats} lastPopped={lastPopped} />
+      <OrbitalVisualization
+        cats={cats}
+        lastPopped={lastPopped}
+        onSelectCategory={onSelectCategory}
+      />
 
       {/* Right: Info panel */}
       <div className="flex flex-col justify-center px-2 py-2">

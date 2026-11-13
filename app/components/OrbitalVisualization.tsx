@@ -1,12 +1,13 @@
 'use client'
 
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { allStat, pct, getOrbitRadius, getStarPosition } from '@/lib/engine'
 import type { Category } from '@/lib/types'
 
 interface OrbitalVisualizationProps {
   cats: Category[]
   lastPopped: string | null
+  onSelectCategory?: (id: string) => void
 }
 
 function getArcPath(cx: number, cy: number, r: number, startAngle: number, endAngle: number) {
@@ -20,7 +21,8 @@ function getArcPath(cx: number, cy: number, r: number, startAngle: number, endAn
   return `M ${x1.toFixed(2)} ${y1.toFixed(2)} A ${r} ${r} 0 ${largeArcFlag} 1 ${x2.toFixed(2)} ${y2.toFixed(2)}`
 }
 
-export default function OrbitalVisualization({ cats, lastPopped }: OrbitalVisualizationProps) {
+export default function OrbitalVisualization({ cats, lastPopped, onSelectCategory }: OrbitalVisualizationProps) {
+  const [hoveredCat, setHoveredCat] = useState<string | null>(null)
   const anglesRef = useRef<Record<string, number>>({})
   const rafRef = useRef<number | null>(null)
   const svgRef = useRef<SVGSVGElement | null>(null)
@@ -114,16 +116,48 @@ export default function OrbitalVisualization({ cats, lastPopped }: OrbitalVisual
           const tasks = cat.subs.flatMap(s => s.tasks)
           const total = tasks.length
           const starSize = total > 40 ? 0.7 : 1
+          const isHovered = hoveredCat === cat.id
 
           return (
-            <g key={cat.id}>
-              {/* Static background orbit track */}
+            <g
+              key={cat.id}
+              onClick={() => onSelectCategory?.(cat.id)}
+              onMouseEnter={() => setHoveredCat(cat.id)}
+              onMouseLeave={() => setHoveredCat(null)}
+              style={{ cursor: onSelectCategory ? 'pointer' : 'default' }}
+              role="button"
+              tabIndex={0}
+              aria-label={`Open ${cat.name} category`}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault()
+                  onSelectCategory?.(cat.id)
+                }
+              }}
+            >
+              <title>{`${cat.name} — Touch / click to view subcategories`}</title>
+
+              {/* Wide invisible stroke hit area (28px) for effortless touch on mobile and mouse */}
+              <circle
+                cx="200" cy="200" r={r}
+                fill="none"
+                stroke="transparent"
+                strokeWidth={28}
+                pointerEvents="stroke"
+              />
+
+              {/* Static background orbit track with hover highlight */}
               <circle
                 cx="200" cy="200" r={r}
                 fill="none"
                 stroke={cat.color}
-                strokeOpacity={0.22}
+                strokeOpacity={isHovered ? 0.75 : 0.22}
+                strokeWidth={isHovered ? 2.6 : 1.2}
                 strokeDasharray={total ? undefined : '3 7'}
+                style={{
+                  transition: 'stroke-opacity 0.2s ease, stroke-width 0.2s ease',
+                  filter: isHovered ? `drop-shadow(0 0 6px ${cat.color})` : 'none',
+                }}
               />
 
               {/* Orbiting group: Progress arcs and stars orbit together around the sun */}
@@ -134,9 +168,9 @@ export default function OrbitalVisualization({ cats, lastPopped }: OrbitalVisual
                     cx="200" cy="200" r={r}
                     fill="none"
                     stroke={cat.color}
-                    strokeWidth={2.4}
+                    strokeWidth={isHovered ? 3.2 : 2.4}
                     strokeOpacity={0.85}
-                    style={{ filter: `drop-shadow(0 0 3px ${cat.color})` }}
+                    style={{ filter: `drop-shadow(0 0 4px ${cat.color})` }}
                   />
                 )}
 
@@ -152,10 +186,10 @@ export default function OrbitalVisualization({ cats, lastPopped }: OrbitalVisual
                         d={getArcPath(200, 200, r, startAngle, endAngle)}
                         fill="none"
                         stroke={cat.color}
-                        strokeWidth={2.4}
+                        strokeWidth={isHovered ? 3.2 : 2.4}
                         strokeLinecap="round"
                         strokeOpacity={0.85}
-                        style={{ filter: `drop-shadow(0 0 3px ${cat.color})` }}
+                        style={{ filter: `drop-shadow(0 0 4px ${cat.color})` }}
                       />
                     )
                   })}
@@ -207,6 +241,33 @@ export default function OrbitalVisualization({ cats, lastPopped }: OrbitalVisual
           }}
         />
       </svg>
+
+      {/* Floating interactive category pill badge */}
+      {hoveredCat && (
+        (() => {
+          const cat = cats.find(c => c.id === hoveredCat)
+          if (!cat) return null
+          return (
+            <div
+              className="absolute bottom-4 left-1/2 -translate-x-1/2 px-3.5 py-1.5 rounded-full text-[12.5px] font-medium flex items-center gap-2 pointer-events-none transition-all duration-200 z-10"
+              style={{
+                background: 'rgba(15, 14, 31, 0.92)',
+                border: `1.5px solid ${cat.color}`,
+                color: '#ECEAFB',
+                boxShadow: `0 4px 16px rgba(0,0,0,0.6), 0 0 12px ${cat.color}55`,
+                backdropFilter: 'blur(8px)',
+              }}
+            >
+              <span
+                className="w-2 h-2 rounded-full inline-block"
+                style={{ backgroundColor: cat.color }}
+              />
+              <span className="font-semibold">{cat.name}</span>
+              <span style={{ opacity: 0.65 }}>• Touch to open subcategories</span>
+            </div>
+          )
+        })()
+      )}
 
       <style>{`
         @keyframes starPop {

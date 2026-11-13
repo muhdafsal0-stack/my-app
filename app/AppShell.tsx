@@ -50,7 +50,7 @@ export default function AppShell() {
           <CategoryView cat={activeCat} onBack={() => setView('home')} />
         ) : (
           <>
-            <HeroSection />
+            <HeroSection onSelectCategory={(catId) => setView(catId)} />
 
             {/* Categories section */}
             <h2
