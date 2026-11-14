@@ -5,6 +5,7 @@ import { useEffect, useState } from 'react'
 import { useOrbitStore } from '@/lib/store'
 import Header from '@/app/components/Header'
 import CategoryView from '@/app/components/CategoryView'
+import DocumentImportModal from '@/app/components/DocumentImportModal'
 
 interface CategoryPageClientProps {
   categoryId: string
@@ -14,6 +15,7 @@ export default function CategoryPageClient({ categoryId }: CategoryPageClientPro
   const router = useRouter()
   const { cats, theme, hydrate } = useOrbitStore()
   const [mounted, setMounted] = useState(false)
+  const [isDocModalOpen, setIsDocModalOpen] = useState(false)
 
   // Hydrate from localStorage on client
   useEffect(() => {
@@ -72,8 +74,15 @@ export default function CategoryPageClient({ categoryId }: CategoryPageClientPro
   return (
     <div className="min-h-screen w-full" style={{ background: 'var(--bg)', color: 'var(--ink)', fontFamily: 'var(--sans)' }}>
       <div className="w-full px-4 sm:px-6 md:px-8 lg:px-10 xl:px-14 py-6 pb-20">
-        <Header onHome={() => router.push('/')} />
+        <Header
+          onHome={() => router.push('/')}
+          onOpenDocImport={() => setIsDocModalOpen(true)}
+        />
         <CategoryView cat={category} onBack={() => router.push('/')} />
+        <DocumentImportModal
+          isOpen={isDocModalOpen}
+          onClose={() => setIsDocModalOpen(false)}
+        />
       </div>
     </div>
   )
