@@ -124,7 +124,11 @@ export default function OrbitalVisualization({ cats, lastPopped, onSelectCategor
               onClick={() => onSelectCategory?.(cat.id)}
               onMouseEnter={() => setHoveredCat(cat.id)}
               onMouseLeave={() => setHoveredCat(null)}
-              style={{ cursor: onSelectCategory ? 'pointer' : 'default' }}
+              className="focus:outline-none select-none"
+              style={{
+                cursor: onSelectCategory ? 'pointer' : 'default',
+                outline: 'none',
+              }}
               role="button"
               tabIndex={0}
               aria-label={`Open ${cat.name} category`}
