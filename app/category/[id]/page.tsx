@@ -1,13 +1,22 @@
-import { Suspense } from 'react'
+import { Suspense, use } from 'react'
 import CategoryPageClient from './CategoryPageClient'
 
-export default async function CategoryPage({
+export const instant = false
+
+function CategoryContent({
   params,
 }: {
   params: Promise<{ id: string }>
 }) {
-  const { id } = await params
+  const { id } = use(params)
+  return <CategoryPageClient categoryId={id} />
+}
 
+export default function CategoryPage({
+  params,
+}: {
+  params: Promise<{ id: string }>
+}) {
   return (
     <Suspense
       fallback={
@@ -19,7 +28,7 @@ export default async function CategoryPage({
         </div>
       }
     >
-      <CategoryPageClient categoryId={id} />
+      <CategoryContent params={params} />
     </Suspense>
   )
 }
