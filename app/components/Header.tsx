@@ -1,16 +1,15 @@
 'use client'
 
-import { Moon, Sun, Download, Upload, FileText } from 'lucide-react'
+import { Moon, Sun, Download, Upload } from 'lucide-react'
 import { useOrbitStore } from '@/lib/store'
 import { exportData, validateImport } from '@/lib/engine'
 import { useRef } from 'react'
 
 interface HeaderProps {
   onHome: () => void
-  onOpenDocImport?: () => void
 }
 
-export default function Header({ onHome, onOpenDocImport }: HeaderProps) {
+export default function Header({ onHome }: HeaderProps) {
   const { theme, toggleTheme, cats, importData } = useOrbitStore()
   const fileRef = useRef<HTMLInputElement>(null)
 
@@ -58,15 +57,10 @@ export default function Header({ onHome, onOpenDocImport }: HeaderProps) {
         <ToolBtn onClick={toggleTheme} title="Switch theme" aria-label="Switch theme">
           {theme === 'dark' ? <Sun size={17} /> : <Moon size={17} />}
         </ToolBtn>
-        {onOpenDocImport && (
-          <ToolBtn onClick={onOpenDocImport} title="Import from Word (.docx) or Text" aria-label="Import from Word or Text">
-            <FileText size={17} />
-          </ToolBtn>
-        )}
         <ToolBtn onClick={handleExport} title="Export data" aria-label="Export data">
           <Download size={17} />
         </ToolBtn>
-        <ToolBtn onClick={() => fileRef.current?.click()} title="Import JSON backup" aria-label="Import JSON backup">
+        <ToolBtn onClick={() => fileRef.current?.click()} title="Import data" aria-label="Import data">
           <Upload size={17} />
         </ToolBtn>
         <input ref={fileRef} type="file" accept="application/json" hidden onChange={handleImport} />

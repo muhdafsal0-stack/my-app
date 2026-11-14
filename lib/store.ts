@@ -47,7 +47,6 @@ interface OrbitStore extends OrbitState {
 
   // Import
   importData: (cats: Category[], theme?: string) => void
-  appendCategories: (newCats: Category[]) => void
 
   // Last popped task id (for animation)
   lastPopped: string | null
@@ -236,16 +235,5 @@ export const useOrbitStore = create<OrbitStore>((set, get) => ({
       | 'system'
     set({ cats, theme: t })
     persist(cats, t)
-  },
-
-  appendCategories(newCats) {
-    const current = get().cats
-    const adjusted = newCats.map((c, i) => ({
-      ...c,
-      sortOrder: current.length + i,
-    }))
-    const cats = [...current, ...adjusted]
-    set({ cats })
-    persist(cats, get().theme)
   },
 }))
