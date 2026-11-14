@@ -1,16 +1,16 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { useOrbitStore } from '@/lib/store'
 import Header from './components/Header'
 import HeroSection from './components/HeroSection'
 import { CategoryCard, AddCategoryCard } from './components/CategoryCard'
 import { TaskStreamPanels } from './components/TaskStream'
-import CategoryView from './components/CategoryView'
 
 export default function AppShell() {
+  const router = useRouter()
   const { cats, theme, hydrate } = useOrbitStore()
-  const [view, setView] = useState<'home' | string>('home')
   const [mounted, setMounted] = useState(false)
 
   // Hydrate from localStorage on client
@@ -34,49 +34,48 @@ export default function AppShell() {
   if (!mounted) {
     return (
       <div className="min-h-screen flex items-center justify-center" style={{ background: 'var(--bg)' }}>
-        <div className="w-[14px] h-[14px] rounded-full" style={{ background: 'radial-gradient(circle at 35% 35%,#FFE9A8,#D9962B)', boxShadow: '0 0 14px #D9962B' }} />
+        <div
+          className="w-[14px] h-[14px] rounded-full"
+          style={{ background: 'radial-gradient(circle at 35% 35%,#FFE9A8,#D9962B)', boxShadow: '0 0 14px #D9962B' }}
+        />
       </div>
     )
   }
 
-  const activeCat = view !== 'home' ? cats.find(c => c.id === view) : null
-
   return (
     <div className="min-h-screen w-full" style={{ background: 'var(--bg)', color: 'var(--ink)', fontFamily: 'var(--sans)' }}>
       <div className="w-full px-4 sm:px-6 md:px-8 lg:px-10 xl:px-14 py-6 pb-20">
-        <Header onHome={() => setView('home')} />
+        <Header onHome={() => router.push('/')} />
 
-        {activeCat ? (
-          <CategoryView cat={activeCat} onBack={() => setView('home')} />
-        ) : (
-          <>
-            <HeroSection onSelectCategory={(catId) => setView(catId)} />
+        <HeroSection onSelectCategory={(catId) => router.push(`/category/${catId}`)} />
 
-            {/* Categories section */}
-            <h2
-              className="font-semibold flex items-baseline justify-between mb-4"
-              style={{ fontFamily: 'var(--serif)', fontSize: '21px', marginTop: '0' }}
-            >
-              Categories
-              <small className="font-medium text-[13px]" style={{ fontFamily: 'var(--sans)', color: 'var(--mute)' }}>
-                {cats.length} total
-              </small>
-            </h2>
+        {/* Categories section */}
+        <h2
+          className="font-semibold flex items-baseline justify-between mb-4"
+          style={{ fontFamily: 'var(--serif)', fontSize: '21px', marginTop: '0' }}
+        >
+          Categories
+          <small className="font-medium text-[13px]" style={{ fontFamily: 'var(--sans)', color: 'var(--mute)' }}>
+            {cats.length} total
+          </small>
+        </h2>
 
-            <div
-              className="grid gap-4 sm:gap-5 mb-12"
-              style={{ gridTemplateColumns: 'repeat(auto-fill,minmax(270px,1fr))' }}
-            >
-              {cats.map(cat => (
-                <CategoryCard key={cat.id} cat={cat} onOpen={id => setView(id)} />
-              ))}
-              <AddCategoryCard />
-            </div>
+        <div
+          className="grid gap-4 sm:gap-5 mb-12"
+          style={{ gridTemplateColumns: 'repeat(auto-fill,minmax(270px,1fr))' }}
+        >
+          {cats.map(cat => (
+            <CategoryCard
+              key={cat.id}
+              cat={cat}
+              onOpen={(id) => router.push(`/category/${id}`)}
+            />
+          ))}
+          <AddCategoryCard />
+        </div>
 
-            {/* Task Streams */}
-            <TaskStreamPanels />
-          </>
-        )}
+        {/* Task Streams */}
+        <TaskStreamPanels />
       </div>
     </div>
   )
