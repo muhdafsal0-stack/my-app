@@ -58,7 +58,7 @@ export function TaskStreamPanels() {
   const stat = allStat(cats)
 
   return (
-    <div className="grid gap-4" style={{ gridTemplateColumns: 'repeat(auto-fill,minmax(300px,1fr))' }}>
+    <div className="grid gap-6 grid-cols-1 lg:grid-cols-2">
       {/* Up Next */}
       <div>
         <h2 className="font-semibold text-[20px] flex items-baseline justify-between mb-4" style={{ fontFamily: 'var(--serif)' }}>

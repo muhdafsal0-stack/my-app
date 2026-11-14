@@ -42,8 +42,8 @@ export default function AppShell() {
   const activeCat = view !== 'home' ? cats.find(c => c.id === view) : null
 
   return (
-    <div className="min-h-screen" style={{ background: 'var(--bg)', color: 'var(--ink)', fontFamily: 'var(--sans)' }}>
-      <div style={{ maxWidth: '1120px', margin: '0 auto', padding: '24px 20px 72px' }}>
+    <div className="min-h-screen w-full" style={{ background: 'var(--bg)', color: 'var(--ink)', fontFamily: 'var(--sans)' }}>
+      <div className="w-full px-4 sm:px-6 md:px-8 lg:px-10 xl:px-14 py-6 pb-20">
         <Header onHome={() => setView('home')} />
 
         {activeCat ? (
@@ -64,8 +64,8 @@ export default function AppShell() {
             </h2>
 
             <div
-              className="grid gap-4 mb-12"
-              style={{ gridTemplateColumns: 'repeat(auto-fill,minmax(250px,1fr))' }}
+              className="grid gap-4 sm:gap-5 mb-12"
+              style={{ gridTemplateColumns: 'repeat(auto-fill,minmax(270px,1fr))' }}
             >
               {cats.map(cat => (
                 <CategoryCard key={cat.id} cat={cat} onOpen={id => setView(id)} />

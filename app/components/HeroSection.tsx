@@ -16,9 +16,9 @@ export default function HeroSection({ onSelectCategory }: HeroSectionProps) {
 
   return (
     <section
-      className="grid gap-7 rounded-[28px] border p-[14px] mb-10"
+      className="grid gap-8 lg:gap-12 rounded-[28px] border p-4 sm:p-6 mb-10 hero-grid items-center"
       style={{
-        gridTemplateColumns: 'minmax(0,1.05fr) minmax(0,1fr)',
+        gridTemplateColumns: 'minmax(0,1.15fr) minmax(0,1fr)',
         background: 'var(--card)',
         borderColor: 'var(--line)',
         boxShadow: 'var(--shadow)',

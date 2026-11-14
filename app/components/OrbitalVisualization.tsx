@@ -67,7 +67,7 @@ export default function OrbitalVisualization({ cats, lastPopped, onSelectCategor
 
   return (
     <div
-      className="relative rounded-[20px] overflow-hidden aspect-square w-full max-h-[520px]"
+      className="relative rounded-[20px] overflow-hidden aspect-square w-full max-h-[560px] mx-auto"
       style={{
         background: 'linear-gradient(180deg,#0E0C2B,#1D1850)',
       }}
