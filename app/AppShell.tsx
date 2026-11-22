@@ -43,7 +43,15 @@ export default function AppShell() {
   }
 
   return (
-    <div className="min-h-screen w-full" style={{ background: 'var(--bg)', color: 'var(--ink)', fontFamily: 'var(--sans)' }}>
+    <div
+      className="min-h-screen w-full transition-colors duration-500"
+      style={{
+        background: 'var(--bg-gradient, var(--bg))',
+        backgroundSize: '100% 100%, 100% 100%, 100% 100%, 360px 360px, auto',
+        color: 'var(--ink)',
+        fontFamily: 'var(--sans)',
+      }}
+    >
       <div className="w-full px-4 sm:px-6 md:px-8 lg:px-10 xl:px-14 py-6 pb-20">
         <Header onHome={() => router.push('/')} />
 
