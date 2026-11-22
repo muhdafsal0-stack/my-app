@@ -93,6 +93,16 @@ export interface DeleteTaskPayload {
   taskId: string
 }
 
+export interface DeletedTaskRecord {
+  task: Task
+  categoryId: string
+  categoryName: string
+  subcategoryId: string
+  subcategoryName: string
+  index: number
+  deletedAt: number
+}
+
 export interface DeleteSubcategoryPayload {
   categoryId: string
   subcategoryId: string

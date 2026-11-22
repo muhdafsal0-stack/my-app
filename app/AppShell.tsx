@@ -7,6 +7,7 @@ import Header from './components/Header'
 import HeroSection from './components/HeroSection'
 import { CategoryCard, AddCategoryCard } from './components/CategoryCard'
 import { TaskStreamPanels } from './components/TaskStream'
+import { UndoDeleteToast } from './components/UndoDeleteToast'
 
 export default function AppShell() {
   const router = useRouter()
@@ -84,6 +85,9 @@ export default function AppShell() {
 
         {/* Task Streams */}
         <TaskStreamPanels />
+
+        {/* Undo Task Deletion Toast */}
+        <UndoDeleteToast />
       </div>
     </div>
   )

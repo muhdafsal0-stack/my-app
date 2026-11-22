@@ -13,6 +13,7 @@ import type {
   ToggleTaskPayload,
   DeleteTaskPayload,
   DeleteSubcategoryPayload,
+  DeletedTaskRecord,
 } from './types'
 import {
   uid,
@@ -45,6 +46,11 @@ interface OrbitStore extends OrbitState {
   toggleTask: (payload: ToggleTaskPayload) => void
   deleteTask: (payload: DeleteTaskPayload) => void
 
+  // Undo task deletion
+  lastDeletedTask: DeletedTaskRecord | null
+  undoDeleteTask: () => void
+  clearLastDeletedTask: () => void
+
   // Import
   importData: (cats: Category[], theme?: string) => void
 
@@ -61,6 +67,7 @@ export const useOrbitStore = create<OrbitStore>((set, get) => ({
   theme: 'dark',
   version: 2,
   lastPopped: null,
+  lastDeletedTask: null,
 
   hydrate() {
     const s = loadState()
@@ -214,7 +221,13 @@ export const useOrbitStore = create<OrbitStore>((set, get) => ({
   },
 
   deleteTask({ categoryId, subcategoryId, taskId }) {
-    const cats = get().cats.map(c => {
+    const currentCats = get().cats
+    const targetCat = currentCats.find(c => c.id === categoryId)
+    const targetSub = targetCat?.subs.find(s => s.id === subcategoryId)
+    const targetIndex = targetSub?.tasks.findIndex(t => t.id === taskId) ?? -1
+    const targetTask = targetIndex !== -1 ? targetSub?.tasks[targetIndex] : undefined
+
+    const cats = currentCats.map(c => {
       if (c.id !== categoryId) return c
       return {
         ...c,
@@ -224,8 +237,48 @@ export const useOrbitStore = create<OrbitStore>((set, get) => ({
         }),
       }
     })
-    set({ cats })
+
+    const deletedRecord: DeletedTaskRecord | null =
+      targetTask && targetCat && targetSub
+        ? {
+            task: targetTask,
+            categoryId: targetCat.id,
+            categoryName: targetCat.name,
+            subcategoryId: targetSub.id,
+            subcategoryName: targetSub.name,
+            index: targetIndex,
+            deletedAt: Date.now(),
+          }
+        : null
+
+    set({ cats, lastDeletedTask: deletedRecord })
     persist(cats, get().theme)
+  },
+
+  undoDeleteTask() {
+    const record = get().lastDeletedTask
+    if (!record) return
+
+    const cats = get().cats.map(c => {
+      if (c.id !== record.categoryId) return c
+      return {
+        ...c,
+        subs: c.subs.map(s => {
+          if (s.id !== record.subcategoryId) return s
+          const tasks = [...s.tasks]
+          const insertIdx = Math.min(Math.max(0, record.index), tasks.length)
+          tasks.splice(insertIdx, 0, record.task)
+          return { ...s, tasks }
+        }),
+      }
+    })
+
+    set({ cats, lastDeletedTask: null })
+    persist(cats, get().theme)
+  },
+
+  clearLastDeletedTask() {
+    set({ lastDeletedTask: null })
   },
 
   importData(cats, theme) {

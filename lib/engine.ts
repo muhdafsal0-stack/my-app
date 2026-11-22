@@ -1,6 +1,7 @@
 // Shared calculation engine for Orbit
 
 import type { Category, Subcategory, StatResult, StageInfo, OrbitState } from './types'
+import { validateOrbitDataWithZod, type ValidationResult } from './schema'
 
 export const ORBIT_COLORS = [
   '#E0A030',
@@ -148,7 +149,9 @@ export function exportData(state: OrbitState): void {
 }
 
 export function validateImport(data: unknown): data is { cats: Category[]; theme?: string } {
-  if (!data || typeof data !== 'object') return false
-  const d = data as Record<string, unknown>
-  return Array.isArray(d.cats)
+  return validateOrbitDataWithZod(data).success
+}
+
+export function validateImportDetailed(data: unknown): ValidationResult {
+  return validateOrbitDataWithZod(data)
 }

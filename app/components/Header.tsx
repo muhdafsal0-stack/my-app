@@ -2,7 +2,7 @@
 
 import { Moon, Sun, Download, Upload } from 'lucide-react'
 import { useOrbitStore } from '@/lib/store'
-import { exportData, validateImport } from '@/lib/engine'
+import { exportData, validateImportDetailed } from '@/lib/engine'
 import { useRef } from 'react'
 
 interface HeaderProps {
@@ -24,12 +24,16 @@ export default function Header({ onHome }: HeaderProps) {
     reader.onload = () => {
       try {
         const data = JSON.parse(reader.result as string)
-        if (!validateImport(data)) throw new Error('Invalid')
-        if (window.confirm('Replace your current data with this file?')) {
-          importData(data.cats, data.theme)
+        const validation = validateImportDetailed(data)
+        if (!validation.success || !validation.data) {
+          alert(`Invalid Orbit data: ${validation.error || 'Failed schema validation'}`)
+          return
         }
-      } catch {
-        alert('That file is not a valid Orbit export.')
+        if (window.confirm(`Replace your current data with this file? (${validation.data.cats.length} categories validated)`)) {
+          importData(validation.data.cats, validation.data.theme)
+        }
+      } catch (err) {
+        alert('File could not be parsed as valid JSON.')
       }
       if (fileRef.current) fileRef.current.value = ''
     }

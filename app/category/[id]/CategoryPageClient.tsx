@@ -5,6 +5,7 @@ import { useEffect, useState } from 'react'
 import { useOrbitStore } from '@/lib/store'
 import Header from '@/app/components/Header'
 import CategoryView from '@/app/components/CategoryView'
+import { UndoDeleteToast } from '@/app/components/UndoDeleteToast'
 
 interface CategoryPageClientProps {
   categoryId: string
@@ -82,6 +83,7 @@ export default function CategoryPageClient({ categoryId }: CategoryPageClientPro
       <div className="w-full px-4 sm:px-6 md:px-8 lg:px-10 xl:px-14 py-6 pb-20">
         <Header onHome={() => router.push('/')} />
         <CategoryView cat={category} onBack={() => router.push('/')} />
+        <UndoDeleteToast />
       </div>
     </div>
   )
